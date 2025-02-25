@@ -15,3 +15,12 @@ model User {
   email String  @unique
   name  String?
 }
+
+
+model Content{
+  id  Int @id @default(autoincrement())
+  duration String
+  niche String
+  targetAudience String
+  tone String
+}
