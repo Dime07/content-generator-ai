@@ -7,6 +7,11 @@ export const jwtPlugin = new Elysia()
         name: "jwt",
         secret: "planning-on-the-go", // Consider using environment variable for production
     }))
+
+
+export const authMiddleware = (app: Elysia) => 
+    app
+    .use(jwtPlugin)
     .derive(async ({ jwt, cookie: { accessToken }, set }) => {
         if (!accessToken.value) {
             // handle error for access token is not available
@@ -31,7 +36,7 @@ export const jwtPlugin = new Elysia()
         }
 
         return {
-            user
+            user,
+            dataTest: "test"
         };
     })
-

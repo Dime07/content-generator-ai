@@ -1,10 +1,17 @@
 
 import { Elysia, t } from "elysia";
 import { createUser, getUserByEmail } from "../services/user.service";
-import {  jwtPlugin } from "../utils/plugin";
+import {  authMiddleware, jwtPlugin } from "../utils/plugin";
 
 export const AuthRouter = new Elysia()
     .use(jwtPlugin)
+    .use(authMiddleware)
+    .get("/me", async ({ dataTest }) => {
+        return {
+            message: "User retrieved successfully",
+            data: dataTest
+        }
+    })
     .post("/sign-in", async ({ body, jwt }) => {
         const { email, password } = body;
 
