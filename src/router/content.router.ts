@@ -1,18 +1,22 @@
 import { Elysia, t } from "elysia";
-import { getAllContent } from "../services/content.service";
 import { generateContentByAi } from "../services/openai.service";
+import { saveGeneratedContent } from "../services/content.service";
 
 export const ContentRouter = new Elysia()
-    .get("/content", () => {
-        const contents = getAllContent()
-        return contents
-    })
     .post("/content", async ({body}) => {
         const {duration, niche, targetAudience, tone} = body
 
         const result = await generateContentByAi({duration, niche, targetAudience, tone})
         
-        return result
+        await saveGeneratedContent({
+            userInput: {duration, niche, targetAudience, tone},
+            generatedContent: result
+        })
+
+        return {
+            message: "Content generated successfully",
+            data: {}
+        }
     }, {
         body: t.Object({
             duration: t.String(),
@@ -20,4 +24,8 @@ export const ContentRouter = new Elysia()
             targetAudience: t.String(),
             tone: t.String(),
         })
+    })
+    .onError((error) => {
+        console.error("Error:", error);
+        return { message: error };
     })

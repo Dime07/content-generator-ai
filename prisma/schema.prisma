@@ -7,20 +7,39 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:../database/dev.db"
 }
 
 model User {
   id    Int     @id @default(autoincrement())
   email String  @unique
   name  String?
+  contents Content[] // Optional relation to track which user created which plans
 }
 
 
 model Content{
-  id  Int @id @default(autoincrement())
-  duration String
-  niche String
+  id             Int            @id @default(autoincrement())
+  duration       String
+  niche          String
   targetAudience String
-  tone String
+  tone           String
+  createdAt      DateTime       @default(now())
+  contentItems   ContentItem[]
+  user           User?          @relation(fields: [userId], references: [id])
+  userId         Int?
 }
+
+model ContentItem {
+  id          Int         @id @default(autoincrement())
+  plan        Content @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId      Int
+  day         Int
+  title       String
+  description String
+  topic       String
+  hashtags    String
+  script      String      // Note: SQLite doesn't support arrays, storing as JSON string
+  createdAt   DateTime    @default(now())
+}
+

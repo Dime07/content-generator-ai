@@ -1,41 +1,59 @@
+import { ContentPlannerResponse, GenerateContentInput } from "../types/openai.type";
 import { aiClient } from "../utils/openai";
-
-interface GenerateContentByAI {
-  duration: string;
-  niche: string;
-  targetAudience: string;
-  tone: string;
-}
 
 export const generateContentByAi = async ({
   duration,
   niche,
   targetAudience,
   tone,
-}: GenerateContentByAI) => {
-  const generated = await aiClient.beta.chat.completions.parse({
-    model: "gpt-4o",
-    messages: [
-      { role: "system", content: `You're a professional content planner. Generate a Content Planner for ${duration} days, focusing on ${niche}. The target audience is ${targetAudience}, and the tone should be ${tone}. give me the response as json only, in array object per day in bahasa indonesia with consistent format, except for field script you can give response like the best 5 of script:
-      {
+}: GenerateContentInput): Promise<ContentPlannerResponse> => {
+
+  try {
+    const generated = await aiClient.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { 
+          role: "system", 
+          content: `You're a professional content planner. Generate a Content Planner for ${duration} days, focusing on ${niche}. The target audience is ${targetAudience}, and the tone should be ${tone}. 
+          
+          Provide the response as JSON only, in an array of objects per day in Bahasa Indonesia with consistent format.
+          For the script field, provide 5 well-structured key points.
+          
+          Response format must be:
+          {
             "contentPlanner": [
-                {
+              {
                 "day": 1,
                 "title": "Judul Konten",
                 "description": "Deskripsi singkat",
-                "topic": "Topik kontent",
-                "hashtags: "list hashtag yang bagus",
-                "script": ["list point utama", "list point kedua"]
-                },
+                "topic": "Topik konten",
+                "hashtags": "list hashtag yang bagus",
+                "script": ["point utama", "point kedua", "point ketiga", "point keempat", "point kelima"]
+              }
             ]
-        }
-      `, },
-    ],
-    response_format: {type: "json_object"}
-  });
+          }`
+        },
+      ],
+      temperature: 0.7,
+      stream:false
+    });
 
-  const result = JSON.parse(generated?.choices[0]?.message?.content ?? "")
 
+    if (!generated?.choices[0]?.message?.content) {
+      throw new Error("Failed to generate content: Empty response from API");
+    }
 
-  return result;
+    // Parse the response
+    const result = JSON.parse(generated.choices[0].message.content) as ContentPlannerResponse;
+    console.log(result)
+    
+    return result;
+  } catch (error: any) {
+    // Simplified error handling
+    if (error.response) {
+      throw new Error(`API error: ${error.response.status} - ${error.response.data?.error?.message || 'Unknown API error'}`);
+    }
+    
+    throw new Error(`Content generation failed: ${error.message || 'Unknown error'}`);
+  }
 };
