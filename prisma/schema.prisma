@@ -14,7 +14,9 @@ model User {
   id    Int     @id @default(autoincrement())
   email String  @unique
   name  String?
-  contents Content[] // Optional relation to track which user created which plans
+  contents Content[]
+  password String
+  createdAt DateTime @default(now())
 }
 
 

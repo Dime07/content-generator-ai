@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { generateContentByAi } from "../services/openai.service";
 import { saveGeneratedContent } from "../services/content.service";
+import jwt from "@elysiajs/jwt";
 
 export const ContentRouter = new Elysia()
     .post("/content", async ({body}) => {
