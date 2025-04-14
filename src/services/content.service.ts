@@ -5,7 +5,8 @@ import { prisma } from "../utils/prisma"
 export const saveGeneratedContent = async ({
     userInput,
     generatedContent,
-}: {userInput: GenerateContentInput, generatedContent: ContentPlannerResponse}) => {
+    userId
+}: {userInput: GenerateContentInput, generatedContent: ContentPlannerResponse, userId: number}) => {
     const {duration, niche, targetAudience, tone} = userInput
 
     const contentItems = generatedContent.contentPlanner.map((item) => ({
@@ -26,7 +27,10 @@ export const saveGeneratedContent = async ({
                 tone,
                 contentItems: {
                     create: contentItems
-                }
+                },
+                user: {
+                    connect: { id: userId },
+                },
             },
         })
     } catch (error) {

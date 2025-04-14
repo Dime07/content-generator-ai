@@ -34,8 +34,7 @@ export const generateContentByAi = async ({
           }`
         },
       ],
-      temperature: 0.7,
-      stream:false
+      stream:false,
     });
 
 
@@ -45,7 +44,6 @@ export const generateContentByAi = async ({
 
     // Parse the response
     const result = JSON.parse(generated.choices[0].message.content) as ContentPlannerResponse;
-    console.log(result)
     
     return result;
   } catch (error: any) {

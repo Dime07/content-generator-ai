@@ -12,27 +12,38 @@ export const jwtPlugin = new Elysia()
 export const authMiddleware = (app: Elysia) => 
     app
     .use(jwtPlugin)
-    .derive(async ({ jwt, cookie: { accessToken }, set }) => {
-        if (!accessToken.value) {
-            // handle error for access token is not available
+    .derive(async ({ jwt, headers, set }) => {
+        // Extract token from Authorization header
+        const authHeader = headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            // handle error for bearer token is not available
             set.status = 401;
-            throw new Error("Access token is missing");
+            throw new Error("Authorization token is missing");
         }
 
-        const jwtPayload = await jwt.verify(accessToken.value);
+        // Get the token part after "Bearer "
+        const token = authHeader.substring(7);
+        
+        const jwtPayload = await jwt.verify(token);
         if (!jwtPayload) {
-            // handle error for access token is tempted or incorrect
+            // handle error for token is tempered or incorrect
             set.status = 403;
-            throw new Error("Access token is invalid");
+            throw new Error("Authorization token is invalid");
         }
 
-        const userId = jwtPayload.sub;
+        // Extract user ID from payload - use id instead of sub to match your auth.router.ts
+        const userId = jwtPayload.id;
+        if (!userId) {
+            set.status = 403;
+            throw new Error("Invalid token payload");
+        }
+        
         const user = await getUserById(Number(userId));
 
         if (!user) {
-        // handle error for user not found from the provided access token
-        set.status = 403;
-        throw new Error("Access token is invalid");
+            // handle error for user not found from the provided token
+            set.status = 403;
+            throw new Error("User not found");
         }
 
         return {
