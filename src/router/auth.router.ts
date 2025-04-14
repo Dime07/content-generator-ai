@@ -1,7 +1,7 @@
 
 import { Elysia, t } from "elysia";
 import { createUser, getUserByEmail } from "../services/user.service";
-import { jwtPlugin } from "../utils/plugin";
+import {  jwtPlugin } from "../utils/plugin";
 
 export const AuthRouter = new Elysia()
     .use(jwtPlugin)
@@ -35,7 +35,7 @@ export const AuthRouter = new Elysia()
         body: t.Object({
             email: t.String(),
             password: t.String()
-        })
+        }),
     })
     .post("/sign-up", async ({ body, jwt }) => {
         const { email, password, name } = body;
